@@ -1,6 +1,9 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour {
 
@@ -22,7 +25,7 @@ public class PlayerMovement : MonoBehaviour {
     public Transform GroundCheck;
 
     // Расстояние до земли, на котором триггерится невидимый квадрат
-    public Vector2 groundDistance = new Vector2(0.51f, 0.005f);
+    public Vector3 groundDistance = new Vector3(0.51f, 0.005f, 0.1f);
 
     // Маска для распознавания земли
     public LayerMask groundMask;
@@ -56,7 +59,7 @@ public class PlayerMovement : MonoBehaviour {
 
         // ГРАВИТАЦИЯ
 
-        if (isGrounded & velocity.y <= 0) {
+        if (isGrounded && velocity.y <= 0) {
 
             velocity.y = 0f;
 
@@ -71,9 +74,16 @@ public class PlayerMovement : MonoBehaviour {
         characterController.Move(velocity * Time.deltaTime / 2);
 
         // Проверка нахождения игрока на земле
-        //isGrounded = Physics.CheckBox(GroundCheck.position, groundDistance, Quaternion.identity, groundMask);
+        isGrounded = Physics.CheckBox(GroundCheck.position, groundDistance, Quaternion.identity, groundMask);
         
 
+        // Прыжок
+        // При нажатии Space по умолчанию, СС подпрыгивает
+        if (Input.GetButtonDown("Jump") && isGrounded) {
+
+            velocity.y = MathF.Sqrt(jumpForce * -2f * gravity);
+
+        }
 
     }
 
