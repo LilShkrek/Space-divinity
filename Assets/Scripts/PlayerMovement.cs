@@ -14,7 +14,7 @@ public class PlayerMovement : MonoBehaviour {
     public float speed = 12f;
 
     // Значение g
-    public float gravity = -0.8f;
+    public float gravity = -0.3f;
 
     // Скорость
     Vector2 velocity;
@@ -31,10 +31,13 @@ public class PlayerMovement : MonoBehaviour {
     public LayerMask groundMask;
 
     // Проверка того, на земле ли персонаж
-    private bool isGrounded;
+    public static bool isGrounded;
 
     // Переменная силы прыжка
-    public float jumpForce = 500f;
+    public float jumpForce = 1500f;
+
+    // Полоска ХП
+    public Image healthBar;
 
     // Start is called before the first frame update
     void Start() {
@@ -55,7 +58,7 @@ public class PlayerMovement : MonoBehaviour {
         characterController.Move(move * speed * Time.deltaTime);
 
 
-        Debug.Log(isGrounded);
+        //Debug.Log(isGrounded);
 
         // ГРАВИТАЦИЯ
 
@@ -77,13 +80,22 @@ public class PlayerMovement : MonoBehaviour {
         isGrounded = Physics.CheckBox(GroundCheck.position, groundDistance, Quaternion.identity, groundMask);
         
 
-        // Прыжок
+        // ПРЫЖОК
         // При нажатии Space по умолчанию, СС подпрыгивает
         if (Input.GetButtonDown("Jump") && isGrounded) {
 
             velocity.y = MathF.Sqrt(jumpForce * -2f * gravity);
             isGrounded = false;
 
+        }
+
+
+        // Отзеркаливание модельки персонажа
+        if (Input.GetKeyDown(KeyCode.A)) {
+            characterController.transform.localScale = new Vector3(-1, 1, 1);
+        } 
+        if (Input.GetKeyDown(KeyCode.D)) {
+            characterController.transform.localScale = new Vector3(1, 1, 1);
         }
 
     }
@@ -94,6 +106,12 @@ public class PlayerMovement : MonoBehaviour {
         // а тут вся сторона
         Gizmos.DrawCube(GroundCheck.position, groundDistance * 2);
 
+    }
+
+    private void OnTriggerEnter (Collider other) {
+        if(other.tag == "Spike") {
+            healthBar.fillAmount -= 0.05f;
+        }
     }
 
 }
