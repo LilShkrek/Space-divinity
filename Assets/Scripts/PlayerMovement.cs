@@ -39,6 +39,9 @@ public class PlayerMovement : MonoBehaviour {
     // Полоска ХП
     public Image healthBar;
 
+    // Дес скрин
+    public GameObject panelDeathScreen;
+
     // Start is called before the first frame update
     void Start() {
         
@@ -109,9 +112,14 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     private void OnTriggerEnter (Collider other) {
-        if(other.tag == "Spike") {
+        if (other.tag == "Spike") {
             healthBar.fillAmount -= 0.05f;
         }
+
+        if (healthBar.fillAmount <= 0) {
+            panelDeathScreen.SetActive(true);
+        }
+
     }
 
 }
