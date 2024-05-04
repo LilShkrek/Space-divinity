@@ -5,29 +5,35 @@ using UnityEngine;
 public class MovementAnimation : MonoBehaviour {
 
     Animator anim;
+    Rigidbody2D rigidbody2D;
 
-    // Start is called before the first frame update
-    void Start() {
+    private void Awake() {
         anim = GetComponent<Animator>();
+        rigidbody2D = GetComponent<Rigidbody2D>();
     }
 
     // Update is called once per frame
     void Update() {
 
         if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) 
-        && PlayerMovement.isGrounded) {
+        && rigidbody2D.velocity.y == 0) {
 
             anim.SetTrigger("MoveTrigger");
 
         }
 
-        if (!PlayerMovement.isGrounded) {
+        if (rigidbody2D.velocity.y != 0) {
 
             anim.SetTrigger("FallTrigger");
 
         }
 
-        
+        if (Input.GetKey(KeyCode.A)) {
+            rigidbody2D.transform.localScale = new Vector3(-1, 1, 1);
+        }
+        if (Input.GetKey(KeyCode.D)) {
+            rigidbody2D.transform.localScale = new Vector3(+1, 1, 1);
+        }
         
     }
 }

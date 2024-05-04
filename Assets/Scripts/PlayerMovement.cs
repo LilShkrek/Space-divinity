@@ -7,34 +7,12 @@ using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour {
 
-    // Ссылка на объект игрока
-    public CharacterController characterController;
+    [SerializeField] private LayerMask groundLayerMask;
+    private Rigidbody2D rigidbody2D;
+    private BoxCollider2D boxCollider2D;
 
-    // Скорость движения
-    public float speed = 12f;
-
-    // Значение g
-    public float gravity = -0.3f;
-
-    // Скорость
-    Vector2 velocity;
-
-    // Передвижение
-    Vector2 move;
-
-    public Transform GroundCheck;
-
-    // Расстояние до земли, на котором триггерится невидимый квадрат
-    public Vector3 groundDistance = new Vector3(0.51f, 0.005f, 0.1f);
-
-    // Маска для распознавания земли
-    public LayerMask groundMask;
-
-    // Проверка того, на земле ли персонаж
-    public static bool isGrounded;
-
-    // Переменная силы прыжка
-    public float jumpForce = 1500f;
+    [SerializeField] private float moveSpeed = 20f;
+    [SerializeField] private float jumpVelocity = 50f;
 
     // Полоска ХП
     public Image healthBar;
@@ -42,76 +20,66 @@ public class PlayerMovement : MonoBehaviour {
     // Дес скрин
     public GameObject panelDeathScreen;
 
-    // Start is called before the first frame update
-    void Start() {
-        
+    private void Awake() {
+        rigidbody2D = transform.GetComponent<Rigidbody2D>();
+        boxCollider2D = transform.GetComponent<BoxCollider2D>();
     }
 
     // Update is called once per frame
     void Update() {
+        
+        if (IsGrounded() && Input.GetKeyDown(KeyCode.Space)) {
+            rigidbody2D.velocity = Vector2.up * jumpVelocity;
+        }
 
+    }
 
-        // ДВИЖЕНИЕ
+    private void FixedUpdate() {
 
-        // Распознавание нажатия AD
-        float x = Input.GetAxis("Horizontal");
+        rigidbody2D.constraints = RigidbodyConstraints2D.FreezeRotation;
 
-        move = transform.right * x;
-
-        characterController.Move(move * speed * Time.deltaTime);
-
-
-        //Debug.Log(isGrounded);
-
-        // ГРАВИТАЦИЯ
-
-        if (isGrounded && velocity.y <= 0) {
-
-            velocity.y = 0f;
-
+        if (Input.GetKey(KeyCode.A)) {
+            rigidbody2D.velocity = new Vector2(-moveSpeed, rigidbody2D.velocity.y);
         } else {
 
-            // Изменение координаты Y в векторе velocity
-            velocity.y += gravity + Time.deltaTime;
+            if (Input.GetKey(KeyCode.D)) {
+                rigidbody2D.velocity = new Vector2(+moveSpeed, rigidbody2D.velocity.y);
+            } else {
+                // Не нажата ни одна клавиша
+                rigidbody2D.velocity = new Vector2(0, rigidbody2D.velocity.y);
+                rigidbody2D.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
 
-        }
+            }
 
-        // Движение в падении
-        characterController.Move(velocity * Time.deltaTime / 2);
-
-        // Проверка нахождения игрока на земле
-        isGrounded = Physics.CheckBox(GroundCheck.position, groundDistance, Quaternion.identity, groundMask);
-        
-
-        // ПРЫЖОК
-        // При нажатии Space по умолчанию, СС подпрыгивает
-        if (Input.GetButtonDown("Jump") && isGrounded) {
-
-            velocity.y = MathF.Sqrt(jumpForce * -2f * gravity);
-            isGrounded = false;
-
-        }
-
-
-        // Отзеркаливание модельки персонажа
-        if (Input.GetKeyDown(KeyCode.A)) {
-            characterController.transform.localScale = new Vector3(-1, 1, 1);
-        } 
-        if (Input.GetKeyDown(KeyCode.D)) {
-            characterController.transform.localScale = new Vector3(1, 1, 1);
         }
 
     }
 
+    private bool IsGrounded() {
 
-    private void OnDrawGizmos() {
-        // groundDistance * 2, потому что в Physics.CheckBox задаётся половины длины стороны,
-        // а тут вся сторона
-        Gizmos.DrawCube(GroundCheck.position, groundDistance * 2);
+        float extraHeightText = .02f;
+        RaycastHit2D raycastHit = Physics2D.BoxCast(boxCollider2D.bounds.center, boxCollider2D.bounds.size, 0f, Vector2.down, extraHeightText, groundLayerMask);
+
+        Color rayColor;
+        if (raycastHit.collider != null) {
+            rayColor = Color.green;
+        } else {
+            rayColor = Color.red;
+        }
+
+        Debug.DrawRay(boxCollider2D.bounds.center + new Vector3(boxCollider2D.bounds.extents.x, 0), Vector2.down * (boxCollider2D.bounds.extents.y + extraHeightText), rayColor);
+        Debug.DrawRay(boxCollider2D.bounds.center - new Vector3(boxCollider2D.bounds.extents.x, 0), Vector2.down * (boxCollider2D.bounds.extents.y + extraHeightText), rayColor);
+        Debug.DrawRay(boxCollider2D.bounds.center - new Vector3(boxCollider2D.bounds.extents.x, boxCollider2D.bounds.extents.y + extraHeightText), Vector2.right * (boxCollider2D.bounds.extents.x * 2f), rayColor);
+
+        //Debug.Log(raycastHit.collider);
+
+        return raycastHit.collider != null;
 
     }
+    
 
-    private void OnTriggerEnter (Collider other) {
+    private void OnTriggerEnter2D (Collider2D other) {
+        Debug.Log("HIT");
         if (other.tag == "Spike") {
             healthBar.fillAmount -= 0.05f;
         }
