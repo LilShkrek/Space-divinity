@@ -16,13 +16,13 @@ public class MovementAnimation : MonoBehaviour {
     void Update() {
 
         if ((Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.D)) 
-        && rigidbody2D.velocity.y == 0) {
+        && PlayerMovement.isGrounded) {
 
             anim.SetTrigger("MoveTrigger");
 
         }
 
-        if (rigidbody2D.velocity.y != 0) {
+        if (!PlayerMovement.isGrounded) {
 
             anim.SetTrigger("FallTrigger");
 

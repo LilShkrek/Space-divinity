@@ -20,6 +20,9 @@ public class PlayerMovement : MonoBehaviour {
     // Дес скрин
     public GameObject panelDeathScreen;
 
+    // Находится ли игрок на земле
+    public static bool isGrounded;
+
     private void Awake() {
         rigidbody2D = transform.GetComponent<Rigidbody2D>();
         boxCollider2D = transform.GetComponent<BoxCollider2D>();
@@ -27,6 +30,8 @@ public class PlayerMovement : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
+
+        isGrounded = IsGrounded();
         
         if (IsGrounded() && Input.GetKeyDown(KeyCode.Space)) {
             rigidbody2D.velocity = Vector2.up * jumpVelocity;
