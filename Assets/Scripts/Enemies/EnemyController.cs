@@ -9,7 +9,7 @@ public class EnemyController : MonoBehaviour {
     public int maxHealth = 100;
     int currentHealth;
 
-    // Start is called before the first frame update
+    // Start is called before the first frame update ыфвыфввыф
     void Start() {
         currentHealth = maxHealth;
     }
